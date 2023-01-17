@@ -77,31 +77,31 @@ jobs:
       - name: Update Version Helm
         run: |
           for i in helm/values-*.yaml; do
-               [ -f "$i" ] || break
-               yq -i ".microservice-chart.image.tag = \"${{ steps.get_version.outputs.get_version }}\"" "$i"
-               git add "$i"
-             done
-             CHART_FILE="helm/Chart.yaml"
-             if [[ -f "$CHART_FILE" ]]; then
-               yq -i ".version = \"${{ steps.get_version.outputs.get_version }}\"" "$CHART_FILE"
-               yq -i ".appVersion = \"${{ steps.get_version.outputs.get_version }}\"" "$CHART_FILE"
-               git add "$CHART_FILE"
-             fi
+            [ -f "$i" ] || break
+            yq -i ".microservice-chart.image.tag = \"${{ steps.get_version.outputs.version }}\"" "$i"
+            git add "$i"
+          done
+          CHART_FILE="helm/Chart.yaml"
+          if [[ -f "$CHART_FILE" ]]; then
+            yq -i ".version = \"${{ steps.get_version.outputs.version }}\"" "$CHART_FILE"
+            yq -i ".appVersion = \"${{ steps.get_version.outputs.version }}\"" "$CHART_FILE"
+            git add "$CHART_FILE"
+          fi
       - name: Update Openapi/Swagger Version
         run: |
           for i in openapi/*.json; do
             [ -f "$i" ] || break
-            cat <<< "$(jq ".info.version = \"${{ steps.get_version.outputs.get_version }}\"" "$i")" > "$i"
+            cat <<< "$(jq ".info.version = \"${{ steps.get_version.outputs.version }}\"" "$i")" > "$i"
             git add $i
           done
           for i in openapi/*.yaml; do
             [ -f "$i" ] || break
-            yq -i ".info.version = \"${{ steps.get_version.outputs.get_version }}\"" "$i"
+            yq -i ".info.version = \"${{ steps.get_version.outputs.version }}\"" "$i"
             git add "$i"
           done
           for i in openapi/*.yml; do
             [ -f "$i" ] || break
-            yq -i ".info.version = \"${{ steps.get_version.outputs.get_version }}\"" "$i"
+            yq -i ".info.version = \"${{ steps.get_version.outputs.version }}\"" "$i"
             git add "$i"
           done
 
@@ -172,7 +172,7 @@ jobs:
         if: ${{ matrix.environment != 'dev' }}
         with:
           secret: ${{ github.TOKEN }}
-          approvers: pagopa-team, jacopocarlini
+          approvers: jacopocarlini
           minimum-approvals: 1
           issue-title: "Deploying v${{ needs.release.outputs.version }} to ${{ matrix.environment }}"
           exclude-workflow-initiator-as-approver: false
